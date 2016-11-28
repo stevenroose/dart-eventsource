@@ -1,7 +1,9 @@
 # eventsource
 
-A library for using EventSource or Server-Side Events (SSE). 
+A library for using EventSource or Server-Sent Events (SSE). 
 Both client and server functionality is provided.
+
+This library implements the interface as described [here](https://html.spec.whatwg.org/multipage/comms.html#server-sent-events).
 
 ## Client usage
 
@@ -20,7 +22,7 @@ EventSource eventSource = await EventSource.connect("http://example.com/events",
 ## Server usage
 
 We recommend using [`shelf_eventsource`](https://pub.dartlang.org/packages/shelf_eventsource) for
-serving Server-Side Events. 
+serving Server-Sent Events. 
 This library provides an `EventSourcePublisher` that manages subscriptions, channels, encoding.
 We refer to documentation in the [`shelf_eventsource`](https://pub.dartlang.org/packages/shelf_eventsource)
 package for more information.
