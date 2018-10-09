@@ -22,7 +22,7 @@ void main() {
       var encoder = new EventSourceEncoder();
       for (Event event in _VECTORS.keys) {
         var encoded = _VECTORS[event];
-        expect(encoder.convert(event), equals(UTF8.encode(encoded)));
+        expect(encoder.convert(event), equals(utf8.encode(encoded)));
       }
     });
     //TODO add gzip test

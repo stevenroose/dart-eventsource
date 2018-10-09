@@ -66,4 +66,6 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
     });
     return controller.stream;
   }
+
+  StreamTransformer<RS, RT> cast <RS, RT>() => StreamTransformer.castFrom<List<int>, Event, RS, RT>(this);
 }
