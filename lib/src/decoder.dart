@@ -5,7 +5,7 @@ import "dart:convert";
 
 import "event.dart";
 
-typedef void RetryIndicator(Duration);
+typedef RetryIndicator = void Function(Duration retry);
 
 class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
   RetryIndicator retryIndicator;
