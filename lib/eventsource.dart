@@ -34,6 +34,7 @@ class EventSource extends Stream<Event> {
   // interface attributes
 
   final Uri url;
+  final Map headers;
 
   EventSourceReadyState get readyState => _readyState;
 
@@ -55,17 +56,17 @@ class EventSource extends Stream<Event> {
 
   /// Create a new EventSource by connecting to the specified url.
   static Future<EventSource> connect(url,
-      {http.Client client, String lastEventId}) async {
+      {http.Client client, String lastEventId, Map headers}) async {
     // parameter initialization
     url = url is Uri ? url : Uri.parse(url);
     client = client ?? new http.Client();
     lastEventId = lastEventId ?? "";
-    EventSource es = new EventSource._internal(url, client, lastEventId);
+    EventSource es = new EventSource._internal(url, client, lastEventId, headers);
     await es._start();
     return es;
   }
 
-  EventSource._internal(this.url, this.client, this._lastEventId) {
+  EventSource._internal(this.url, this.client, this._lastEventId, this.headers) {
     _decoder = new EventSourceDecoder(retryIndicator: _updateRetryDelay);
   }
 
@@ -84,6 +85,11 @@ class EventSource extends Stream<Event> {
     request.headers["Accept"] = "text/event-stream";
     if (_lastEventId.isNotEmpty) {
       request.headers["Last-Event-ID"] = _lastEventId;
+    }
+    if (headers != null) {
+      headers.forEach((k,v) {
+        request.headers[k] = v;
+      }); 
     }
     var response = await client.send(request);
     if (response.statusCode != 200) {
