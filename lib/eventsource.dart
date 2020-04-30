@@ -53,20 +53,25 @@ class EventSource extends Stream<Event> {
   Duration _retryDelay = const Duration(milliseconds: 3000);
   String _lastEventId;
   EventSourceDecoder _decoder;
+  Object _body;
+  String _method;
+
 
   /// Create a new EventSource by connecting to the specified url.
   static Future<EventSource> connect(url,
-      {http.Client client, String lastEventId, Map headers}) async {
+      {http.Client client, String lastEventId, Map headers, Object body, String method}) async {
     // parameter initialization
     url = url is Uri ? url : Uri.parse(url);
     client = client ?? new http.Client();
     lastEventId = lastEventId ?? "";
-    EventSource es = new EventSource._internal(url, client, lastEventId, headers);
+    body = body ?? "";
+    method = method ?? "GET";
+    EventSource es = new EventSource._internal(url, client, lastEventId, headers, body, method);
     await es._start();
     return es;
   }
 
-  EventSource._internal(this.url, this.client, this._lastEventId, this.headers) {
+  EventSource._internal(this.url, this.client, this._lastEventId, this.headers, this._body, this._method) {
     _decoder = new EventSourceDecoder(retryIndicator: _updateRetryDelay);
   }
 
@@ -80,7 +85,7 @@ class EventSource extends Stream<Event> {
   /// Attempt to start a new connection.
   Future _start() async {
     _readyState = EventSourceReadyState.CONNECTING;
-    var request = new http.Request("GET", url);
+    var request = new http.Request(_method, url);
     request.headers["Cache-Control"] = "no-cache";
     request.headers["Accept"] = "text/event-stream";
     if (_lastEventId.isNotEmpty) {
@@ -91,6 +96,12 @@ class EventSource extends Stream<Event> {
         request.headers[k] = v;
       }); 
     }
+    if (_body == null) {
+      request.body = '';
+    } else {
+      request.body = json.encode(_body);
+    }
+
     var response = await client.send(request);
     if (response.statusCode != 200) {
       // server returned an error
