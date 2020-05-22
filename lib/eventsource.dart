@@ -59,12 +59,12 @@ class EventSource extends Stream<Event> {
 
   /// Create a new EventSource by connecting to the specified url.
   static Future<EventSource> connect(url,
-      {http.Client client, String lastEventId, Map headers, Object body, String method}) async {
+      {http.Client client, String lastEventId, Map headers, String body, String method}) async {
     // parameter initialization
     url = url is Uri ? url : Uri.parse(url);
     client = client ?? new http.Client();
     lastEventId = lastEventId ?? "";
-    body = body ?? "";
+    body = json.encode(body ?? "");
     method = method ?? "GET";
     EventSource es = new EventSource._internal(url, client, lastEventId, headers, body, method);
     await es._start();
@@ -96,11 +96,7 @@ class EventSource extends Stream<Event> {
         request.headers[k] = v;
       }); 
     }
-    if (_body == null) {
-      request.body = '';
-    } else {
-      request.body = json.encode(_body);
-    }
+    request.body = _body;
 
     var response = await client.send(request);
     if (response.statusCode != 200) {
