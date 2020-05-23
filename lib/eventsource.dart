@@ -64,7 +64,7 @@ class EventSource extends Stream<Event> {
     url = url is Uri ? url : Uri.parse(url);
     client = client ?? new http.Client();
     lastEventId = lastEventId ?? "";
-    body = json.encode(body ?? "");
+    body = body ?? "";
     method = method ?? "GET";
     EventSource es = new EventSource._internal(url, client, lastEventId, headers, body, method);
     await es._start();
