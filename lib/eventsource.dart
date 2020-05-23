@@ -53,7 +53,7 @@ class EventSource extends Stream<Event> {
   Duration _retryDelay = const Duration(milliseconds: 3000);
   String _lastEventId;
   EventSourceDecoder _decoder;
-  Object _body;
+  String _body;
   String _method;
 
 
