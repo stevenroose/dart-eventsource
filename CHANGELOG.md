@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3 (2020-06-03)
+
+- Support overwriting the default HTTP method and body
+
 ## 0.2.2 (2019-07-25)
 
 - Add the ability to add custom headers
