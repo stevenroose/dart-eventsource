@@ -19,6 +19,16 @@ EventSource eventSource = await EventSource.connect("http://example.com/events",
     client: new http.BrowserClient());
 ```
 
+If you wish to have it connect only when the first listener attaches (and not otherwise), then pass the
+optional parameter `openOnlyOnFirstListener` (as true). If you wish to close it after the last listener detaches, then
+pass the optional parmeter `closeOnLastListener`.
+
+```dart
+EventSource eventSource = await EventSource.connect("http://example.com/events", 
+  openOnlyOnFirstListener: true, closeOnLastListener: true);
+```
+
+
 ## Server usage
 
 We recommend using [`shelf_eventsource`](https://pub.dartlang.org/packages/shelf_eventsource) for

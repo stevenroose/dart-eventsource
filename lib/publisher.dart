@@ -1,7 +1,5 @@
 library eventsource.server;
 
-export "src/event.dart";
-
 import "dart:async";
 
 import "package:logging/logging.dart" as log;
@@ -9,6 +7,8 @@ import "package:logging/logging.dart" as log;
 import "src/event.dart";
 import "src/event_cache.dart";
 import "src/proxy_sink.dart";
+
+export "src/event.dart";
 
 /// An EventSource publisher. It can manage different channels of events.
 /// This class forms the backbone of an EventSource server. To actually serve
@@ -99,7 +99,7 @@ class EventSourcePublisher extends Sink<Event> {
       String lastEventId}) {
     _logFine("New subscriber on channel $channel.");
     // create a sink for the subscription
-    var sub = new ProxySink(onAdd: onEvent, onClose: onClose);
+    var sub = new ProxySink<Event>(onAdd: onEvent, onClose: onClose);
     // save the subscription
     _subsByChannel.putIfAbsent(channel, () => []).add(sub);
     // replay past events

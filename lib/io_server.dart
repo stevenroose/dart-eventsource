@@ -5,8 +5,8 @@ import "dart:io" as io;
 import "package:sync/waitgroup.dart";
 
 import "publisher.dart";
-import "src/event.dart";
 import "src/encoder.dart";
+import "src/event.dart";
 
 /// Create a handler to serve [io.HttpRequest] objects for the specified
 /// channel.
@@ -18,7 +18,7 @@ Function createIoHandler(EventSourcePublisher publisher,
 
     // set content encoding to gzip if we allow it and the request supports it
     bool useGzip = gzip &&
-        (request.headers.value(io.HttpHeaders.ACCEPT_ENCODING) ?? "")
+        (request.headers.value(io.HttpHeaders.acceptEncodingHeader) ?? "")
             .contains("gzip");
 
     // set headers and status code
