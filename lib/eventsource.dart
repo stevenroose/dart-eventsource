@@ -131,7 +131,7 @@ class EventSource extends Stream<Event> {
     var request = new http.Request(_method, url);
     request.headers["Cache-Control"] = "no-cache";
     request.headers["Accept"] = "text/event-stream";
-    if (_lastEventId.isNotEmpty) {
+    if (_lastEventId?.isNotEmpty ?? false) {
       request.headers["Last-Event-ID"] = _lastEventId;
     }
     if (headers != null) {
@@ -153,7 +153,14 @@ class EventSource extends Stream<Event> {
 
     // push it through a StreamController so we can close it gracefully
     _incomingDataController = StreamController<List<int>>();
-    response.stream.pipe(_incomingDataController);
+
+    response.stream.listen((value) {
+      _incomingDataController.add(value);
+    },
+        onError: _retry,
+        cancelOnError: true,
+        onDone: () => _readyState = EventSourceReadyState.CLOSED);
+
     _incomingDataController.stream.transform(_decoder).listen((Event event) {
       _streamController.add(event);
       _lastEventId = event.id;

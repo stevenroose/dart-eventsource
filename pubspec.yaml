@@ -5,7 +5,7 @@ author: Steven Roose <stevenroose@gmail.com>
 homepage: https://github.com/stevenroose/dart-eventsource
 
 environment:
-  sdk: ">=2.3.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   collection: ">=1.4.1 <2.0.0"
