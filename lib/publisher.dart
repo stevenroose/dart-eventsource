@@ -99,7 +99,7 @@ class EventSourcePublisher extends Sink<Event> {
       String lastEventId}) {
     _logFine("New subscriber on channel $channel.");
     // create a sink for the subscription
-    var sub = new ProxySink(onAdd: onEvent, onClose: onClose);
+    ProxySink<Event> sub = new ProxySink(onAdd: onEvent, onClose: onClose);
     // save the subscription
     _subsByChannel.putIfAbsent(channel, () => []).add(sub);
     // replay past events
