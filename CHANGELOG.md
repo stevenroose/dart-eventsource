@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0 (2021-07-19)
+
+- Fix Dart v2 compatibility
+- Upgrade `http_parser` dependency
+
 ## 0.2.3 (2020-06-03)
 
 - Support overwriting the default HTTP method and body
