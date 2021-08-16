@@ -21,7 +21,7 @@ void main() {
     test("vectors", () {
       var encoder = new EventSourceEncoder();
       for (Event event in _VECTORS.keys) {
-        var encoded = _VECTORS[event];
+        var encoded = _VECTORS[event]!;
         expect(encoder.convert(event), equals(utf8.encode(encoded)));
       }
     });
@@ -31,8 +31,8 @@ void main() {
   group("decoder", () {
     test("vectors", () async {
       for (Event event in _VECTORS.keys) {
-        var encoded = _VECTORS[event];
-        var stream = new Stream.fromIterable([encoded])
+        var encoded = _VECTORS[event]!;
+        var stream = new Stream<String>.fromIterable([encoded])
             .transform(new Utf8Encoder())
             .transform(new EventSourceDecoder());
         stream.listen(expectAsync1((decodedEvent) {

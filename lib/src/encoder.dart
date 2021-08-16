@@ -30,7 +30,7 @@ class EventSourceEncoder extends Converter<Event, List<int>> {
   String convertToString(Event event) {
     String payload = "";
     for (String prefix in _fields.keys) {
-      String value = _fields[prefix](event);
+      String? value = _fields[prefix]?.call(event);
       if (value == null || value.isEmpty) {
         continue;
       }
@@ -44,11 +44,13 @@ class EventSourceEncoder extends Converter<Event, List<int>> {
 
   @override
   Sink<Event> startChunkedConversion(Sink<List<int>> sink) {
-    Sink inputSink = sink;
+    Sink<dynamic> inputSink = sink;
     if (compressed) {
-      inputSink = gzip.encoder.startChunkedConversion(inputSink);
+      inputSink =
+          gzip.encoder.startChunkedConversion(inputSink as Sink<List<int>>);
     }
-    inputSink = utf8.encoder.startChunkedConversion(inputSink);
+    inputSink =
+        utf8.encoder.startChunkedConversion(inputSink as Sink<List<int>>);
     return new ProxySink(
         onAdd: (Event event) => inputSink.add(convertToString(event)),
         onClose: () => inputSink.close());

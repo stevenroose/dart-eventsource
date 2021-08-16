@@ -8,12 +8,12 @@ import "event.dart";
 typedef RetryIndicator = void Function(Duration retry);
 
 class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
-  RetryIndicator retryIndicator;
+  RetryIndicator? retryIndicator;
 
   EventSourceDecoder({this.retryIndicator});
 
   Stream<Event> bind(Stream<List<int>> stream) {
-    StreamController<Event> controller;
+    late StreamController<Event> controller;
     controller = new StreamController(onListen: () {
       // the event we are currently building
       Event currentEvent = new Event();
@@ -31,18 +31,18 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
           // event is done
           // strip ending newline from data
           if (currentEvent.data != null) {
-            var match = removeEndingNewlineRegex.firstMatch(currentEvent.data);
-            currentEvent.data = match.group(1);
+            var match = removeEndingNewlineRegex.firstMatch(currentEvent.data!);
+            currentEvent.data = match?.group(1);
           }
           controller.add(currentEvent);
           currentEvent = new Event();
           return;
         }
         // match the line prefix and the value using the regex
-        Match match = lineRegex.firstMatch(line);
-        String field = match.group(1);
-        String value = match.group(2) ?? "";
-        if (field.isEmpty) {
+        Match? match = lineRegex.firstMatch(line);
+        String? field = match?.group(1);
+        String? value = match?.group(2) ?? "";
+        if (field?.isEmpty == true) {
           // lines starting with a colon are to be ignored
           return;
         }
@@ -57,9 +57,7 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
             currentEvent.id = value;
             break;
           case "retry":
-            if (retryIndicator != null) {
-              retryIndicator(new Duration(milliseconds: int.parse(value)));
-            }
+            retryIndicator?.call(new Duration(milliseconds: int.parse(value)));
             break;
         }
       });
@@ -67,5 +65,6 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
     return controller.stream;
   }
 
-  StreamTransformer<RS, RT> cast <RS, RT>() => StreamTransformer.castFrom<List<int>, Event, RS, RT>(this);
+  StreamTransformer<RS, RT> cast<RS, RT>() =>
+      StreamTransformer.castFrom<List<int>, Event, RS, RT>(this);
 }
