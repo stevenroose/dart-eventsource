@@ -8,7 +8,7 @@ import "event.dart";
 class EventCache {
   final int cacheCapacity;
   final bool comparableIds;
-  Map<String, List<Event>> _caches = new Map<String, List<Event>>();
+  Map<String, List<Event>> _caches = <String, List<Event>>{};
 
   EventCache({this.cacheCapacity, this.comparableIds: true});
 
@@ -41,7 +41,7 @@ class EventCache {
   /// [Event.id].
   void add(Event event, [Iterable<String> channels = const [""]]) {
     for (String channel in channels) {
-      List<Event> cache = _caches.putIfAbsent(channel, () => new List());
+      List<Event> cache = _caches.putIfAbsent(channel, () => []);
       if (cacheCapacity != null && cache.length >= cacheCapacity) {
         cache.removeAt(0);
       }

@@ -18,7 +18,7 @@ Function createIoHandler(EventSourcePublisher publisher,
 
     // set content encoding to gzip if we allow it and the request supports it
     bool useGzip = gzip &&
-        (request.headers.value(io.HttpHeaders.ACCEPT_ENCODING) ?? "")
+        (request.headers.value(io.HttpHeaders.acceptEncodingHeader) ?? "")
             .contains("gzip");
 
     // set headers and status code

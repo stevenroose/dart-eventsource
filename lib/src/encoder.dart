@@ -22,7 +22,7 @@ class EventSourceEncoder extends Converter<Event, List<int>> {
     String payload = convertToString(event);
     List<int> bytes = utf8.encode(payload);
     if (compressed) {
-      bytes = GZIP.encode(bytes);
+      bytes = gzip.encode(bytes);
     }
     return bytes;
   }
@@ -46,7 +46,7 @@ class EventSourceEncoder extends Converter<Event, List<int>> {
   Sink<Event> startChunkedConversion(Sink<List<int>> sink) {
     Sink inputSink = sink;
     if (compressed) {
-      inputSink = GZIP.encoder.startChunkedConversion(inputSink);
+      inputSink = gzip.encoder.startChunkedConversion(inputSink);
     }
     inputSink = utf8.encoder.startChunkedConversion(inputSink);
     return new ProxySink(
