@@ -1,7 +1,5 @@
 library eventsource;
 
-export "src/event.dart";
-
 import "dart:async";
 import "dart:convert";
 
@@ -9,8 +7,10 @@ import "package:http/http.dart" as http;
 import "package:http/src/utils.dart" show encodingForCharset;
 import "package:http_parser/http_parser.dart" show MediaType;
 
-import "src/event.dart";
 import "src/decoder.dart";
+import "src/event.dart";
+
+export "src/event.dart";
 
 enum EventSourceReadyState {
   CONNECTING,
@@ -55,24 +55,33 @@ class EventSource extends Stream<Event> {
   EventSourceDecoder _decoder;
   String _body;
   String _method;
-
+  bool _allowMalformedUtf8;
 
   /// Create a new EventSource by connecting to the specified url.
   static Future<EventSource> connect(url,
-      {http.Client client, String lastEventId, Map headers, String body, String method}) async {
+      {http.Client client,
+      String lastEventId,
+      Map headers,
+      String body,
+      String method,
+      bool allowMalformedUtf8 = false}) async {
     // parameter initialization
     url = url is Uri ? url : Uri.parse(url);
     client = client ?? new http.Client();
     lastEventId = lastEventId ?? "";
     body = body ?? "";
     method = method ?? "GET";
-    EventSource es = new EventSource._internal(url, client, lastEventId, headers, body, method);
+    EventSource es = new EventSource._internal(
+        url, client, lastEventId, headers, body, method, allowMalformedUtf8);
     await es._start();
     return es;
   }
 
-  EventSource._internal(this.url, this.client, this._lastEventId, this.headers, this._body, this._method) {
-    _decoder = new EventSourceDecoder(retryIndicator: _updateRetryDelay);
+  EventSource._internal(this.url, this.client, this._lastEventId, this.headers,
+      this._body, this._method, this._allowMalformedUtf8) {
+    _decoder = new EventSourceDecoder(
+        retryIndicator: _updateRetryDelay,
+        allowMalformedUtf8: _allowMalformedUtf8);
   }
 
   // proxy the listen call to the controller's listen call
@@ -92,9 +101,9 @@ class EventSource extends Stream<Event> {
       request.headers["Last-Event-ID"] = _lastEventId;
     }
     if (headers != null) {
-      headers.forEach((k,v) {
+      headers.forEach((k, v) {
         request.headers[k] = v;
-      }); 
+      });
     }
     request.body = _body;
 

@@ -9,8 +9,9 @@ typedef RetryIndicator = void Function(Duration retry);
 
 class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
   RetryIndicator retryIndicator;
+  bool allowMalformedUtf8;
 
-  EventSourceDecoder({this.retryIndicator});
+  EventSourceDecoder({this.retryIndicator, this.allowMalformedUtf8 = false});
 
   Stream<Event> bind(Stream<List<int>> stream) {
     StreamController<Event> controller;
@@ -24,7 +25,7 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
       // single event. So we build events on the fly and broadcast the event as
       // soon as we encounter a double newline, then we start a new one.
       stream
-          .transform(new Utf8Decoder())
+          .transform(new Utf8Decoder(allowMalformed: allowMalformedUtf8))
           .transform(new LineSplitter())
           .listen((String line) {
         if (line.isEmpty) {
@@ -67,5 +68,6 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
     return controller.stream;
   }
 
-  StreamTransformer<RS, RT> cast <RS, RT>() => StreamTransformer.castFrom<List<int>, Event, RS, RT>(this);
+  StreamTransformer<RS, RT> cast<RS, RT>() =>
+      StreamTransformer.castFrom<List<int>, Event, RS, RT>(this);
 }
