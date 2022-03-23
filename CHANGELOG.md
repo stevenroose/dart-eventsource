@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 (2022-03-23)
+
+- Migrate to null-safety
+
 ## 0.3.0 (2021-07-19)
 
 - Fix Dart v2 compatibility
