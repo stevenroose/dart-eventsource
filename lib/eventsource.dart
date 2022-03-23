@@ -34,7 +34,7 @@ class EventSource extends Stream<Event> {
   // interface attributes
 
   final Uri url;
-  final Map headers;
+  final Map<String, String>? headers;
 
   EventSourceReadyState get readyState => _readyState;
 
@@ -51,34 +51,38 @@ class EventSource extends Stream<Event> {
 
   http.Client client;
   Duration _retryDelay = const Duration(milliseconds: 3000);
-  String _lastEventId;
-  EventSourceDecoder _decoder;
+  String? _lastEventId;
+  late EventSourceDecoder _decoder;
   String _body;
   String _method;
 
-
   /// Create a new EventSource by connecting to the specified url.
   static Future<EventSource> connect(url,
-      {http.Client client, String lastEventId, Map headers, String body, String method}) async {
+      {http.Client? client,
+      String? lastEventId,
+      Map<String, String>? headers,
+      String? body,
+      String? method}) async {
     // parameter initialization
     url = url is Uri ? url : Uri.parse(url);
     client = client ?? new http.Client();
-    lastEventId = lastEventId ?? "";
     body = body ?? "";
     method = method ?? "GET";
-    EventSource es = new EventSource._internal(url, client, lastEventId, headers, body, method);
+    EventSource es = new EventSource._internal(
+        url, client, lastEventId, headers, body, method);
     await es._start();
     return es;
   }
 
-  EventSource._internal(this.url, this.client, this._lastEventId, this.headers, this._body, this._method) {
+  EventSource._internal(this.url, this.client, this._lastEventId, this.headers,
+      this._body, this._method) {
     _decoder = new EventSourceDecoder(retryIndicator: _updateRetryDelay);
   }
 
   // proxy the listen call to the controller's listen call
   @override
-  StreamSubscription<Event> listen(void onData(Event event),
-          {Function onError, void onDone(), bool cancelOnError}) =>
+  StreamSubscription<Event> listen(void onData(Event event)?,
+          {Function? onError, void onDone()?, bool? cancelOnError}) =>
       _streamController.stream.listen(onData,
           onError: onError, onDone: onDone, cancelOnError: cancelOnError);
 
@@ -88,14 +92,12 @@ class EventSource extends Stream<Event> {
     var request = new http.Request(_method, url);
     request.headers["Cache-Control"] = "no-cache";
     request.headers["Accept"] = "text/event-stream";
-    if (_lastEventId.isNotEmpty) {
-      request.headers["Last-Event-ID"] = _lastEventId;
+    if (_lastEventId?.isNotEmpty == true) {
+      request.headers["Last-Event-ID"] = _lastEventId!;
     }
-    if (headers != null) {
-      headers.forEach((k,v) {
-        request.headers[k] = v;
-      }); 
-    }
+    headers?.forEach((k, v) {
+      request.headers[k] = v;
+    });
     request.body = _body;
 
     var response = await client.send(request);
