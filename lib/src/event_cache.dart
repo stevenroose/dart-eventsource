@@ -8,9 +8,9 @@ import "event.dart";
 class EventCache {
   final int? cacheCapacity;
   final bool comparableIds;
-  Map<String, List<Event>> _caches = <String, List<Event>>{};
+  final Map<String, List<Event>> _caches = <String, List<Event>>{};
 
-  EventCache({this.cacheCapacity, this.comparableIds: true});
+  EventCache({this.cacheCapacity, this.comparableIds = true});
 
   void replay(Sink<Event> sink, String lastEventId, [String channel = ""]) {
     List<Event>? cache = _caches[channel];
