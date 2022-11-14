@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0 (2022-11-12)
+- Updated to modern dart style and linting.
+- API BREAK: EventSourceReadyState values are now camelCase.
+
 ## 0.4.0 (2022-03-23)
 
 - Migrate to null-safety
