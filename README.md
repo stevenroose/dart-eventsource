@@ -9,7 +9,7 @@ This library implements the interface as described [here](https://html.spec.what
 
 For more advanced usage, see the `example/` directory. 
 Creating a new EventSource client is as easy as a single call.
-The http package is used under the hood, so wherever this package works, this lbirary will also work.
+The http package is used under the hood, so wherever this package works, this library will also work.
 Browser usage is slightly different.
 
 ```dart
