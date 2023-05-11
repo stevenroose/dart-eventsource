@@ -109,13 +109,17 @@ class EventSource extends Stream<Event> {
     }
     _readyState = EventSourceReadyState.OPEN;
     // start streaming the data
-    response.stream.transform(_decoder).listen((Event event) {
-      _streamController.add(event);
-      _lastEventId = event.id;
-    },
+    response.stream.transform(_decoder).listen(
+        (Event event) {
+          _streamController.add(event);
+          _lastEventId = event.id;
+        },
         cancelOnError: true,
         onError: _retry,
-        onDone: () => _readyState = EventSourceReadyState.CLOSED);
+        onDone: () {
+          _readyState = EventSourceReadyState.CLOSED;
+          _streamController.close();
+        });
   }
 
   /// Retries until a new connection is established. Uses exponential backoff.
