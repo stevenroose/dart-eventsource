@@ -12,20 +12,21 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
 
   EventSourceDecoder({this.retryIndicator});
 
+  @override
   Stream<Event> bind(Stream<List<int>> stream) {
     late StreamController<Event> controller;
-    controller = new StreamController(onListen: () {
+    controller = StreamController(onListen: () {
       // the event we are currently building
-      Event currentEvent = new Event();
+      Event currentEvent = Event();
       // the regexes we will use later
-      RegExp lineRegex = new RegExp(r"^([^:]*)(?::)?(?: )?(.*)?$");
-      RegExp removeEndingNewlineRegex = new RegExp(r"^((?:.|\n)*)\n$");
+      RegExp lineRegex = RegExp(r"^([^:]*)(?::)?(?: )?(.*)?$");
+      RegExp removeEndingNewlineRegex = RegExp(r"^((?:.|\n)*)\n$");
       // This stream will receive chunks of data that is not necessarily a
       // single event. So we build events on the fly and broadcast the event as
       // soon as we encounter a double newline, then we start a new one.
       stream
-          .transform(new Utf8Decoder())
-          .transform(new LineSplitter())
+          .transform(Utf8Decoder())
+          .transform(LineSplitter())
           .listen((String line) {
         if (line.isEmpty) {
           // event is done
@@ -35,7 +36,7 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
             currentEvent.data = match?.group(1);
           }
           controller.add(currentEvent);
-          currentEvent = new Event();
+          currentEvent = Event();
           return;
         }
         // match the line prefix and the value using the regex
@@ -51,13 +52,13 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
             currentEvent.event = value;
             break;
           case "data":
-            currentEvent.data = (currentEvent.data ?? "") + value + "\n";
+            currentEvent.data = "${currentEvent.data ?? ""}$value\n";
             break;
           case "id":
             currentEvent.id = value;
             break;
           case "retry":
-            retryIndicator?.call(new Duration(milliseconds: int.parse(value)));
+            retryIndicator?.call(Duration(milliseconds: int.parse(value)));
             break;
         }
       });
@@ -65,6 +66,7 @@ class EventSourceDecoder implements StreamTransformer<List<int>, Event> {
     return controller.stream;
   }
 
+  @override
   StreamTransformer<RS, RT> cast<RS, RT>() =>
       StreamTransformer.castFrom<List<int>, Event, RS, RT>(this);
 }

@@ -9,19 +9,19 @@ import "package:eventsource/src/decoder.dart";
 import "package:eventsource/src/encoder.dart";
 import "package:eventsource/src/event.dart";
 
-Map<Event, String> _VECTORS = {
-  new Event(id: "1", event: "Add", data: "This is a test"):
+Map<Event, String> _vectors = {
+  Event(id: "1", event: "Add", data: "This is a test"):
       "id: 1\nevent: Add\ndata: This is a test\n\n",
-  new Event(data: "This message, it\nhas two lines."):
+  Event(data: "This message, it\nhas two lines."):
       "data: This message, it\ndata: has two lines.\n\n",
 };
 
 void main() {
   group("encoder", () {
     test("vectors", () {
-      var encoder = new EventSourceEncoder();
-      for (Event event in _VECTORS.keys) {
-        var encoded = _VECTORS[event]!;
+      var encoder = EventSourceEncoder();
+      for (Event event in _vectors.keys) {
+        var encoded = _vectors[event]!;
         expect(encoder.convert(event), equals(utf8.encode(encoded)));
       }
     });
@@ -30,11 +30,11 @@ void main() {
 
   group("decoder", () {
     test("vectors", () async {
-      for (Event event in _VECTORS.keys) {
-        var encoded = _VECTORS[event]!;
-        var stream = new Stream<String>.fromIterable([encoded])
-            .transform(new Utf8Encoder())
-            .transform(new EventSourceDecoder());
+      for (Event event in _vectors.keys) {
+        var encoded = _vectors[event]!;
+        var stream = Stream<String>.fromIterable([encoded])
+            .transform(Utf8Encoder())
+            .transform(EventSourceDecoder());
         stream.listen(expectAsync1((decodedEvent) {
           expect(decodedEvent.id, equals(event.id));
           expect(decodedEvent.event, equals(event.event));
@@ -43,15 +43,15 @@ void main() {
       }
     });
     test("pass retry value", () async {
-      Event event = new Event(id: "1", event: "Add", data: "This is a test");
+      Event event = Event(id: "1", event: "Add", data: "This is a test");
       String encodedWithRetry =
           "id: 1\nevent: Add\ndata: This is a test\nretry: 100\n\n";
       var changeRetryValue = expectAsync1((Duration value) {
         expect(value.inMilliseconds, equals(100));
       }, count: 1);
-      var stream = new Stream.fromIterable([encodedWithRetry])
-          .transform(new Utf8Encoder())
-          .transform(new EventSourceDecoder(retryIndicator: changeRetryValue));
+      var stream = Stream.fromIterable([encodedWithRetry])
+          .transform(Utf8Encoder())
+          .transform(EventSourceDecoder(retryIndicator: changeRetryValue));
       stream.listen(expectAsync1((decodedEvent) {
         expect(decodedEvent.id, equals(event.id));
         expect(decodedEvent.event, equals(event.event));

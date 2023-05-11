@@ -9,17 +9,17 @@ import "proxy_sink.dart";
 class EventSourceEncoder extends Converter<Event, List<int>> {
   final bool compressed;
 
-  const EventSourceEncoder({bool this.compressed: false});
+  const EventSourceEncoder({this.compressed = false});
 
-  static Map<String, Function> _fields = {
+  static final Map<String, Function> _fields = {
     "id: ": (e) => e.id,
     "event: ": (e) => e.event,
     "data: ": (e) => e.data,
   };
 
   @override
-  List<int> convert(Event event) {
-    String payload = convertToString(event);
+  List<int> convert(Event input) {
+    String payload = convertToString(input);
     List<int> bytes = utf8.encode(payload);
     if (compressed) {
       bytes = gzip.encode(bytes);
@@ -36,7 +36,7 @@ class EventSourceEncoder extends Converter<Event, List<int>> {
       }
       // multi-line values need the field prefix on every line
       value = value.replaceAll("\n", "\n$prefix");
-      payload += prefix + value + "\n";
+      payload += "$prefix$value\n";
     }
     payload += "\n";
     return payload;
@@ -51,7 +51,7 @@ class EventSourceEncoder extends Converter<Event, List<int>> {
     }
     inputSink =
         utf8.encoder.startChunkedConversion(inputSink as Sink<List<int>>);
-    return new ProxySink(
+    return ProxySink(
         onAdd: (Event event) => inputSink.add(convertToString(event)),
         onClose: () => inputSink.close());
   }

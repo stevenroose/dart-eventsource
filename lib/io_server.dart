@@ -5,14 +5,13 @@ import "dart:io" as io;
 import "package:sync/waitgroup.dart";
 
 import "publisher.dart";
-import "src/event.dart";
 import "src/encoder.dart";
 
 /// Create a handler to serve [io.HttpRequest] objects for the specified
 /// channel.
 /// This method can be passed to the [io.HttpServer.listen] method.
 Function createIoHandler(EventSourcePublisher publisher,
-    {String channel: "", bool gzip: false}) {
+    {String channel = "", bool gzip = false}) {
   void ioHandler(io.HttpRequest request) {
     io.HttpResponse response = request.response;
 
@@ -30,13 +29,13 @@ Function createIoHandler(EventSourcePublisher publisher,
     if (useGzip) response.headers.set("Content-Encoding", "gzip");
     // a wait group to keep track of flushes in order not to close while
     // flushing
-    WaitGroup flushes = new WaitGroup();
+    WaitGroup flushes = WaitGroup();
     // flush the headers
     flushes.add(1);
     response.flush().then((_) => flushes.done());
 
     // create encoder for this connection
-    var encodedSink = new EventSourceEncoder(compressed: useGzip)
+    var encodedSink = EventSourceEncoder(compressed: useGzip)
         .startChunkedConversion(response);
 
     // define the methods for pushing events and closing the connection

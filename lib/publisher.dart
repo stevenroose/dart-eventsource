@@ -27,31 +27,31 @@ class EventSourcePublisher extends Sink<Event> {
   /// If your Event's id properties are not incremental using
   /// [Comparable.compare], set [comparableIds] to false.
   EventSourcePublisher({
-    int cacheCapacity: 0,
-    bool comparableIds: false,
-    bool enableLogging: true,
+    int cacheCapacity = 0,
+    bool comparableIds = false,
+    bool enableLogging = true,
   }) {
     if (cacheCapacity > 0) {
-      _cache = new EventCache(cacheCapacity: cacheCapacity);
+      _cache = EventCache(cacheCapacity: cacheCapacity);
     }
     if (enableLogging) {
-      logger = new log.Logger("EventSourceServer");
+      logger = log.Logger("EventSourceServer");
     }
   }
 
-  Map<String, List<ProxySink>> _subsByChannel = {};
+  final Map<String, List<ProxySink>> _subsByChannel = {};
 
   /// Creates a Sink for the specified channel.
   /// The `add` and `remove` methods of this channel are equivalent to the
   /// respective methods of this class with the specific channel passed along.
-  Sink<Event> channel(String channel) => new ProxySink(
+  Sink<Event> channel(String channel) => ProxySink(
       onAdd: (e) => add(e, channels: [channel]),
       onClose: () => close(channels: [channel]));
 
   /// Add a publication to the specified channels.
   /// By default, only adds to the default channel.
   @override
-  void add(Event event, {Iterable<String> channels: const [""]}) {
+  void add(Event event, {Iterable<String> channels = const [""]}) {
     for (String channel in channels) {
       List<ProxySink>? subs = _subsByChannel[channel];
       if (subs == null) {
@@ -70,7 +70,7 @@ class EventSourcePublisher extends Sink<Event> {
   /// All the connections with the subscribers to this channels will be closed.
   /// By default only closes the default channel.
   @override
-  void close({Iterable<String> channels: const [""]}) {
+  void close({Iterable<String> channels = const [""]}) {
     for (String channel in channels) {
       List<ProxySink>? subs = _subsByChannel[channel];
       if (subs == null) {
@@ -97,7 +97,7 @@ class EventSourcePublisher extends Sink<Event> {
   }) {
     _logFine("New subscriber on channel $channel.");
     // create a sink for the subscription
-    ProxySink<Event> sub = new ProxySink(onAdd: onEvent, onClose: onClose);
+    ProxySink<Event> sub = ProxySink(onAdd: onEvent, onClose: onClose);
     // save the subscription
     _subsByChannel.putIfAbsent(channel, () => []).add(sub);
     // replay past events
