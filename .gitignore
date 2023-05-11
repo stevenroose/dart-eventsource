@@ -22,3 +22,5 @@ doc/api/
 *.ipr
 *.iws
 /.dart_tool
+
+pubspec.lock

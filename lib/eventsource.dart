@@ -49,6 +49,8 @@ class EventSource extends Stream<Event> {
 
   EventSourceReadyState _readyState = EventSourceReadyState.CLOSED;
 
+  StreamSubscription<void>? _httpStreamSubscription;
+
   http.Client client;
   Duration _retryDelay = const Duration(milliseconds: 3000);
   String? _lastEventId;
@@ -86,6 +88,12 @@ class EventSource extends Stream<Event> {
       _streamController.stream.listen(onData,
           onError: onError, onDone: onDone, cancelOnError: cancelOnError);
 
+  // close the event source and terminate the remote connection
+  Future<void> close() async {
+    await _httpStreamSubscription?.cancel();
+    await _streamController.close();
+  }
+
   /// Attempt to start a new connection.
   Future _start() async {
     _readyState = EventSourceReadyState.CONNECTING;
@@ -109,7 +117,8 @@ class EventSource extends Stream<Event> {
     }
     _readyState = EventSourceReadyState.OPEN;
     // start streaming the data
-    response.stream.transform(_decoder).listen((Event event) {
+    _httpStreamSubscription = response.stream.transform(_decoder).listen(
+        (Event event) {
       _streamController.add(event);
       _lastEventId = event.id;
     },
@@ -125,6 +134,11 @@ class EventSource extends Stream<Event> {
     Duration backoff = _retryDelay;
     while (true) {
       await new Future.delayed(backoff);
+      // stop retrying if the event source was closed
+      if (_streamController.isClosed) {
+        break;
+      }
+
       try {
         await _start();
         break;
